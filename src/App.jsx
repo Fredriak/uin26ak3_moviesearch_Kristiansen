@@ -1,20 +1,16 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
+//Koden er skrevet med delvis hjelp av chatgpt https://chatgpt.com/share/69b7d228-6e58-8008-85db-14b9c0d22a58
 import './App.css'
-import {Route, Routes} from 'react-router-dom'
+import { Route, Routes } from 'react-router-dom'
 import Home from './pages/Home'
 import Movie from './pages/Movie'
 
 function App() {
-  const [count, setCount] = useState(0)
 
   return (
-<Routes>
-    <Route index element={<Home />} />
-    <Route path=":movie" element={<Movie />} />
-
-</Routes>
+    <Routes>
+      <Route path="/" element={<Home />} />
+      <Route path="/:movie" element={<Movie />} />
+    </Routes>
   )
 }
 

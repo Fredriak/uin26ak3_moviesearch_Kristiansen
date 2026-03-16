@@ -1,3 +1,5 @@
+//Koden er skrever med delvis hjelp fra chatgpt https://chatgpt.com/share/69b7d228-6e58-8008-85db-14b9c0d22a58
+
 import { useEffect, useState } from "react"
 import History from '../components/History'
 import MovieCard from "../components/MovieCard"
