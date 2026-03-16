@@ -1,45 +1,144 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
+import History from '../components/History'
+import MovieCard from "../components/MovieCard"
 
 export default function Home (){
 
-    const[search, setSearch] = useState()
+    const [search, setSearch] = useState("")
+    const [movies, setMovies] = useState([])
 
-    const baseUrl = `http://www.omdbapi.com/?s=${search}&apikey=`
+    const storedHistory = localStorage.getItem("search")
+    const [focused, setFocused] = useState(false)
 
-    const apiKey = '879a9d7d'
+    const [history, setHistory] = useState(
+        storedHistory ? JSON.parse(storedHistory) : []
+    )
+
+    const apiKey = import.meta.env.VITE_APP_API_KEY
+
+    const baseUrl = `https://www.omdbapi.com/?s=${search}&apikey=${apiKey}`
+
+    useEffect(()=>{
+        localStorage.setItem("search", JSON.stringify(history))
+    },[history])
+
+
+    // henter James Bond filmer ved start
+    useEffect(()=>{
+
+        const getBondMovies = async ()=>{
+
+            try{
+
+                const response = await fetch(`https://www.omdbapi.com/?s=james+bond&apikey=${apiKey}`)
+                const data = await response.json()
+
+                if(data.Search){
+                    setMovies(data.Search.slice(0,10))
+                }
+
+            }
+            catch(err){
+                console.error(err)
+            }
+
+        }
+
+        getBondMovies()
+
+    },[])
+
 
     const getMovies = async()=>{
-        try
-        {
-            const response = await fetch(`${baseUrl}${apiKey}`)
+
+        if(!search || search.length < 3) return
+
+        try{
+
+            const response = await fetch(baseUrl)
             const data = await response.json()
 
-            console.log(data)
-            
+            if(data.Search){
+                setMovies(data.Search)
+            }
+
         }
         catch(err){
-            console.error(err);
+            console.error(err)
         }
+
     }
+
 
     const handleChange = (e)=>{
         setSearch(e.target.value)
     }
 
+
+    const handleSubmit = (e)=>{
+        e.preventDefault()
+
+        if(!search || search.length < 3) return
+
+        setHistory((prev)=>[...prev, search])
+
+        getMovies()
+
+        e.target.reset()
+    }
+
+
     return(
     <main>
-        <h1>Forside</h1>
-        <form>
+
+        <header>
+            <h1>Forside</h1>
+        </header>
+
+        <section>
+
+        <form onSubmit={handleSubmit}>
+
             <label>
+
                 Søk etter film
-            <input type="search" placeholder="Harry Potter" onChange={handleChange}></input>
+
+                <input
+                    type="search"
+                    placeholder="Harry Potter"
+                    onChange={handleChange}
+                    onFocus={()=> setFocused(true)}
+                    value={search}
+                />
+
+                {focused ? <History history={history} setSearch={setSearch}/> : null }
+
             </label>
+
+            <button type="submit">
+                Søk
+            </button>
+
         </form>
-        <button onClick={getMovies}>Søk</button>
+
+        </section>
+
+
+        <section>
+
+            <ul>
+
+                {movies?.map(movie => (
+                    <li key={movie.imdbID}>
+                        <MovieCard movie={movie}/>
+                    </li>
+                ))}
+
+            </ul>
+
+        </section>
+
     </main>
 
-
     )
-
-  
 }
